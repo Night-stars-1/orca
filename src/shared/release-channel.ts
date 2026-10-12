@@ -24,7 +24,14 @@ export const RELEASE_CHANNEL_LABELS: Readonly<Record<ReleaseChannel, string>> = 
 export const HOURLY_RELEASE_REPO = 'stablyai/orca-hourly'
 export const DAILY_RELEASE_REPO = 'stablyai/orca-daily'
 export const ADHOC_RELEASE_REPO = 'stablyai/orca-adhoc'
-export const MAIN_RELEASE_REPO = 'stablyai/orca'
+export const OFFICIAL_RELEASE_REPO = 'stablyai/orca'
+// Why: electron-vite `define` substitutes this; fork builds set ORCA_RELEASE_REPO so in-app updates stay on the fork.
+declare const ORCA_RELEASE_REPO: string | null
+export const MAIN_RELEASE_REPO: string =
+  typeof ORCA_RELEASE_REPO === 'string' && ORCA_RELEASE_REPO.length > 0
+    ? ORCA_RELEASE_REPO
+    : OFFICIAL_RELEASE_REPO
+export const RELEASES_LATEST_DOWNLOAD_URL = `https://github.com/${MAIN_RELEASE_REPO}/releases/latest/download`
 
 /** The dev channels, each published to its own repo rather than the main one. */
 const DEDICATED_REPO_CHANNELS = ['hourly', 'daily', 'adhoc'] as const
