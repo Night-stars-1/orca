@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { createBootstrapFatalExitBanner } from './config/build-plugins/bootstrap-fatal-exit-banner'
 import { createPdfjsViewerAssetsPlugin } from './config/build-plugins/pdfjs-viewer-assets'
 import { createProcessHostDevRebuildPlugin } from './config/build-plugins/process-host-dev-rebuild'
+import { withReleaseRepoDefine } from './config/build-plugins/release-repo-define'
 import {
   CLI_MAIN_ENTRY_NAMES,
   createPlainNodeEntryGuardPlugin
@@ -305,12 +306,12 @@ export const electronViteConfig: UserConfig = {
     },
     // Why: compile-time substitution for the telemetry gate. See the block
     // above for the full rationale.
-    define: {
+    define: withReleaseRepoDefine({
       ORCA_BUILD_IDENTITY: ORCA_BUILD_IDENTITY_LITERAL,
       ORCA_POSTHOG_WRITE_KEY: ORCA_POSTHOG_WRITE_KEY_LITERAL,
       ORCA_DIAGNOSTICS_TOKEN_URL: ORCA_DIAGNOSTICS_TOKEN_URL_LITERAL,
       ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL
-    },
+    }),
     // Why: @xterm/headless declares "exports": null in package.json, which
     // prevents Vite's default resolver from finding the CJS entry. Point
     // directly at the published main file so the bundler can inline it.
@@ -331,9 +332,7 @@ export const electronViteConfig: UserConfig = {
     }
   },
   renderer: {
-    define: {
-      ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL
-    },
+    define: withReleaseRepoDefine({ ORCA_BUILD_COMMIT: ORCA_BUILD_COMMIT_LITERAL }),
     resolve: {
       alias: {
         ...markdownParserAliases,
