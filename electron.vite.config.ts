@@ -313,4 +313,8 @@ export const electronViteConfig: UserConfig = {
   }
 }
 
+// Fork-only hook kept at the end of the file so upstream edits rarely conflict with it.
+import { applyReleaseRepoDefine } from './config/build-plugins/release-repo-define'
+applyReleaseRepoDefine(electronViteConfig)
+
 export default defineConfig(electronViteConfig)
