@@ -77,6 +77,11 @@ const isWinHourly = process.env.ORCA_WIN_HOURLY === '1'
 const isWinDaily = process.env.ORCA_WIN_DAILY === '1'
 const isWinAdhoc = process.env.ORCA_WIN_ADHOC === '1'
 const isWinDevChannel = isWinHourly || isWinDaily || isWinAdhoc
+// Why: fork builds (`owner/repo`) publish to their own repo and ship unsigned.
+const forkReleaseRepo = process.env.ORCA_RELEASE_REPO
+  ? process.env.ORCA_RELEASE_REPO.split('/')
+  : null
+const isForkRelease = forkReleaseRepo !== null
 const isMacRelease = process.env.ORCA_MAC_RELEASE === '1' || isMacHourly || isMacDaily || isMacAdhoc
 const isLinuxArm64Release = process.env.ORCA_LINUX_ARM64_RELEASE === '1'
 const localBuildVersion =
@@ -542,12 +547,12 @@ module.exports = {
     // pass, embedded, then deleted). The hook signs nothing — it relays the file
     // to and from the CI SignPath request, and is inert when the relay env vars
     // are unset, so local and dev builds are unaffected. publisherName stays on
-    // its existing channel split above.
+    // its existing channel split above; fork builds are unsigned like dev ones.
     signtoolOptions: {
       sign: signWindowsUninstallerViaSignPath,
-      ...(isWinDevChannel ? {} : { publisherName: 'SignPath Foundation' })
+      ...(isWinDevChannel || isForkRelease ? {} : { publisherName: 'SignPath Foundation' })
     },
-    ...(isWinDevChannel ? { verifyUpdateCodeSignature: false } : {}),
+    ...(isWinDevChannel || isForkRelease ? { verifyUpdateCodeSignature: false } : {}),
     extraResources: [
       ...commonExtraResources,
       ...windowsRuntimeResources,
@@ -781,16 +786,23 @@ module.exports = {
   // on Intel Macs. The beforeBuild hook performs Orca's targeted rebuild and
   // returns false so electron-builder does not rebuild optional cpu-features.
   npmRebuild: true,
-  publish: {
-    provider: 'github',
-    owner: 'stablyai',
-    repo: devChannelRepo ?? 'orca',
-    // Why draft on the main repo: `--publish always` otherwise creates a
-    // public GitHub release as soon as the first platform uploads, and
-    // /releases/latest serves a missing Windows exe. release-cut undrafts
-    // only after every required asset exists.
-    releaseType: devChannelRepo ? 'prerelease' : 'draft'
-  }
+  publish: isForkRelease
+    ? {
+        provider: 'github',
+        owner: forkReleaseRepo[0],
+        repo: forkReleaseRepo[1],
+        releaseType: 'release'
+      }
+    : {
+        provider: 'github',
+        owner: 'stablyai',
+        repo: devChannelRepo ?? 'orca',
+        // Why draft on the main repo: `--publish always` otherwise creates a
+        // public GitHub release as soon as the first platform uploads, and
+        // /releases/latest serves a missing Windows exe. release-cut undrafts
+        // only after every required asset exists.
+        releaseType: devChannelRepo ? 'prerelease' : 'draft'
+      }
 }
 
 // Stamp the effective channel version where node-mode CLI code can read it.
