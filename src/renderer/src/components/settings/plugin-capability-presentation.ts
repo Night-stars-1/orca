@@ -37,6 +37,11 @@ export function pluginCapabilityDescription(kind: string, fallback: string): str
         'auto.components.settings.PluginConsentDialog.capability.settingsOwn',
         "Read and change the plugin's own settings"
       )
+    case 'statusBar:write':
+      return translate(
+        'auto.components.settings.PluginConsentDialog.capability.statusBarWrite',
+        "Update the plugin's own status bar items"
+      )
     default:
       return fallback
   }

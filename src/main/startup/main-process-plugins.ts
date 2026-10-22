@@ -22,6 +22,7 @@ import { logStartupMilestone } from './startup-diagnostics'
 import { agentHookServer } from '../agent-hooks/server'
 import { emitPluginWorktreeLifecycle } from './main-process-pty-startup'
 import { mainProcessState as state } from './main-process-state'
+import { wirePluginStatusBar } from './main-process-plugin-status-bar'
 import type { OrcaRuntimeService } from '../runtime/orca-runtime'
 
 export async function initializeMainProcessPlugins(runtime: OrcaRuntimeService): Promise<void> {
@@ -68,6 +69,7 @@ export async function initializeMainProcessPlugins(runtime: OrcaRuntimeService):
     getPluginKillListEntry: (pluginKey) => state.pluginKillListService?.find(pluginKey) ?? null,
     hostEntryPath: resolvePluginHostEntryPath(app.getAppPath(), app.isPackaged)
   })
+  wirePluginStatusBar(state.pluginService)
   const bundledPluginBootstrap = new PluginBundledBootstrapCoordinator({
     root: resolveBundledPluginRoot({
       isPackaged: app.isPackaged,
