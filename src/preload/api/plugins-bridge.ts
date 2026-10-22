@@ -5,6 +5,7 @@ import type {
 } from '../../shared/plugins/plugin-panel-bridge'
 import type { PluginConsentRequest } from '../../shared/plugins/plugin-consent-request'
 import type { PluginChangeEvent } from '../../shared/plugins/plugin-change-event'
+import type { PluginStatusBarSnapshot } from '../../shared/plugins/plugin-status-bar'
 import type {
   PluginHostInstallResult,
   PluginHostInstallSource,
@@ -55,6 +56,16 @@ export const pluginsApi = {
     ipcRenderer.on('plugins:changed', listener)
     return () => {
       ipcRenderer.removeListener('plugins:changed', listener)
+    }
+  },
+  listStatusBar: (): Promise<PluginStatusBarSnapshot[]> =>
+    ipcRenderer.invoke('plugins:listStatusBar'),
+  onStatusBarChanged: (callback): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, snapshot: PluginStatusBarSnapshot): void =>
+      callback(snapshot)
+    ipcRenderer.on('plugins:statusBarChanged', listener)
+    return () => {
+      ipcRenderer.removeListener('plugins:statusBarChanged', listener)
     }
   }
 } satisfies PreloadApi['plugins']

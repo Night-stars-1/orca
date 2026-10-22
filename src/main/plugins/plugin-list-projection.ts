@@ -64,6 +64,15 @@ export type PluginListEntry = {
     handler: { type: 'built-in'; action: PluginCommandAliasActionId } | { type: 'worker' }
     keybindings: { key: string; when: 'global' | 'worktree' }[]
   }[]
+  statusBar?: {
+    id: string
+    text: string
+    icon?: string
+    tooltip?: string
+    priority: number
+    command?: string
+    popoverTabKey?: `plugin:${string}`
+  }[]
   hasWorker: boolean
   vmRecipes: {
     id: string
@@ -183,6 +192,17 @@ export async function buildPluginList(
           context: command.context,
           handler: command.handler,
           keybindings: command.keybindings
+        })),
+        statusBar: plugin.manifest.contributes.statusBar.map((item) => ({
+          id: item.id,
+          text: item.text,
+          ...(item.icon ? { icon: item.icon } : {}),
+          ...(item.tooltip ? { tooltip: item.tooltip } : {}),
+          priority: item.priority,
+          ...(item.command ? { command: item.command } : {}),
+          ...(item.popover
+            ? { popoverTabKey: pluginPanelTabKey(plugin.pluginKey, item.popover) }
+            : {})
         })),
         hasWorker: Boolean(plugin.manifest.main),
         vmRecipes: service.contentPacks.vmRecipes.preview(plugin.pluginKey).map(({ recipe }) => ({

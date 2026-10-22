@@ -1,0 +1,38 @@
+{
+  "manifestVersion": 1,
+  "id": "status-bar-demo",
+  "publisher": "orca-samples",
+  "name": "Status Bar Demo",
+  "version": "1.0.0",
+  "description": "Sample plugin showing status-bar text, progress, spinner, badge, menu, and popover.",
+  "engines": { "orca": ">=1.4.214" },
+  "pluginApi": 1,
+  "main": "main.mjs",
+  "contributes": {
+    "commands": [
+      { "id": "start-build", "title": "Status Demo: Start Build" },
+      { "id": "cancel-build", "title": "Status Demo: Cancel Build" }
+    ],
+    "panels": [
+      { "id": "build-details", "title": "Build Details", "icon": "hammer", "entry": "popover.html" }
+    ],
+    "statusBar": [
+      {
+        "id": "build",
+        "text": "Build: idle",
+        "icon": "hammer",
+        "tooltip": "Click to start a fake build",
+        "priority": 10,
+        "command": "start-build"
+      },
+      {
+        "id": "details",
+        "text": "",
+        "icon": "gauge",
+        "tooltip": "Build details",
+        "popover": "build-details"
+      }
+    ]
+  },
+  "capabilities": [{ "kind": "statusBar:write" }]
+}

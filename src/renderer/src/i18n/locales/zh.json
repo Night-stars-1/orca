@@ -4276,6 +4276,9 @@
                 }
               }
             }
+          },
+          "PluginStatusBarItems": {
+            "commandFailed": "{{value0}} 失败"
           }
         }
       },
@@ -11827,7 +11830,8 @@
             "storage": "在插件自己的存储文件夹中存储数据",
             "secrets": "在插件自己的加密保险库中存储和读取密钥",
             "eventsSubscribe": "在工作树创建或移除以及智能体状态更改时获得通知",
-            "settingsOwn": "读取和更改插件自己的设置"
+            "settingsOwn": "读取和更改插件自己的设置",
+            "statusBarWrite": "更新插件自己的状态栏项"
           },
           "decisionFailed": "无法保存权限决定。请重试。"
         },

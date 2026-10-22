@@ -7,6 +7,10 @@ import {
   type PluginHostMethodSpec
 } from '../../shared/plugins/plugin-host-api'
 import type { PluginEventName } from '../../shared/plugins/plugin-manifest'
+import {
+  pluginStatusBarUpdateParamsSchema,
+  type PluginStatusBarUpdate
+} from '../../shared/plugins/plugin-status-bar'
 
 export type PluginWorktreeContext = {
   worktreeId: string
@@ -47,6 +51,10 @@ export type PluginHostServices = {
     set(pluginId: string, key: string, value: unknown): { ok: true } | { ok: false; error: string }
   }
   subscribeEvents(pluginId: string, events: PluginEventName[]): PluginEventName[]
+  updateStatusBarItem(
+    pluginId: string,
+    update: PluginStatusBarUpdate
+  ): { ok: true } | { ok: false; error: string }
 }
 
 export type BoundPluginHostMethod = {
@@ -167,6 +175,16 @@ const HANDLERS = new Map<string, BoundPluginHostMethod>([
   definePluginMethod('events.subscribe', async (params, { pluginId, services }) => {
     const { events } = params as { events: PluginEventName[] }
     return { subscribed: services.subscribeEvents(pluginId, events) }
+  }),
+  definePluginMethod('statusBar.update', async (params, { pluginId, services }) => {
+    const result = services.updateStatusBarItem(
+      pluginId,
+      pluginStatusBarUpdateParamsSchema.parse(params)
+    )
+    if (!result.ok) {
+      throw new Error(result.error)
+    }
+    return { ok: true }
   })
 ])
 
