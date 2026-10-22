@@ -16,6 +16,7 @@ import {
 import { applyPluginConsent, applyPluginEnablement } from '../plugins/plugin-enablement'
 import type { PluginService } from '../plugins/plugin-service'
 import { bindPluginPanelOwnerLifecycle } from '../plugins/plugin-panel-owner-lifecycle'
+import { pluginStatusBarRegistry } from '../plugins/plugin-status-bar-registry'
 import { isQualifiedPluginKey } from '../../shared/plugins/plugin-manifest'
 import { pluginConsentRequestSchema } from '../../shared/plugins/plugin-consent-request'
 import { normalizePluginIdList } from '../../shared/plugins/plugin-consent-state'
@@ -111,6 +112,10 @@ export function registerPluginHandlers(
   // Why: startup discovery is fire-and-forget; every handler awaits it so an
   // early renderer fetch can't observe the empty pre-discovery list.
   ipcMain.handle('plugins:list', async () => listPluginsForClients(pluginService))
+  ipcMain.handle('plugins:listStatusBar', async () => {
+    await pluginService.whenReady()
+    return pluginStatusBarRegistry.list()
+  })
   ipcMain.handle('plugins:listLanguagePacks', async () => {
     await pluginService.whenReady()
     return pluginService.contentPacks.languagePacks.list()

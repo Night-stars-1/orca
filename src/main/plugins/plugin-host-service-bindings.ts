@@ -3,6 +3,7 @@ import { PLUGIN_WORKSPACE_TERMINAL_LIMIT } from '../../shared/plugins/plugin-hos
 import type { PluginHostServices } from './plugin-host-methods'
 import { PluginSecretsStore } from './plugin-secrets-store'
 import { PluginKvStore } from './plugin-storage-store'
+import { pluginStatusBarRegistry } from './plugin-status-bar-registry'
 import type { TerminalInputKind } from '../../shared/terminal-input-kind'
 
 /** Structural subset of OrcaRuntimeService exposed to plugin facade bindings. */
@@ -34,8 +35,12 @@ export function bindPluginHostServices(input: {
   delegate: PluginRuntimeDelegate
   pluginsDataDir: string
   subscribeEvents: (pluginKey: string, events: PluginEventName[]) => PluginEventName[]
+  updateStatusBarItem?: PluginHostServices['updateStatusBarItem']
 }): PluginHostServices {
   const { delegate, pluginsDataDir, subscribeEvents } = input
+  const updateStatusBarItem =
+    input.updateStatusBarItem ??
+    ((pluginKey, update) => pluginStatusBarRegistry.update(pluginKey, update))
   return {
     resolveActiveWorktreeContext: async () => {
       const context = await delegate.resolveActiveWorktreeContext()
@@ -83,6 +88,7 @@ export function bindPluginHostServices(input: {
       set: (key, itemKey, value) =>
         new PluginKvStore(pluginsDataDir, key, 'settings.json').set(itemKey, value)
     },
-    subscribeEvents
+    subscribeEvents,
+    updateStatusBarItem
   }
 }

@@ -7,6 +7,7 @@ import type { PluginLanguagePackRegistration } from '../../shared/plugins/plugin
 import type { PluginChangeEvent } from '../../shared/plugins/plugin-change-event'
 import type { PluginManifest } from '../../shared/plugins/plugin-manifest'
 import type { PluginMarketplaceGitSource } from '../../shared/plugins/plugin-marketplace'
+import type { PluginStatusBarSnapshot } from '../../shared/plugins/plugin-status-bar'
 
 /** Panel contribution as surfaced by the main-process plugin service. */
 export type PluginHostPanel = {
@@ -52,6 +53,15 @@ export type PluginHostListEntry = {
     context: 'global' | 'worktree'
     handler: { type: 'built-in'; action: string } | { type: 'worker' }
     keybindings: { key: string; when: 'global' | 'worktree' }[]
+  }[]
+  statusBar?: {
+    id: string
+    text: string
+    icon?: string
+    tooltip?: string
+    priority: number
+    command?: string
+    popoverTabKey?: `plugin:${string}`
   }[]
   hasWorker: boolean
   vmRecipes?: {
@@ -188,4 +198,7 @@ export type PluginsApi = {
   refresh: () => Promise<PluginHostListEntry[]>
   /** Fires whenever installed plugins, worker states, panels, or content packs change. */
   onChanged: (callback: (event: PluginChangeEvent) => void) => () => void
+  /** Runtime status-bar overrides; optional so older bridges fail soft. */
+  listStatusBar?: () => Promise<PluginStatusBarSnapshot[]>
+  onStatusBarChanged?: (callback: (snapshot: PluginStatusBarSnapshot) => void) => () => void
 }

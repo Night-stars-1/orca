@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { PLUGIN_EVENT_NAMES } from './plugin-manifest'
 import type { PluginCapabilityKind } from './plugin-capabilities'
+import { pluginStatusBarUpdateParamsSchema } from './plugin-status-bar'
 
 /**
  * Host API v0 — the separately-versioned public facade plugins call. Every
@@ -249,6 +250,17 @@ export const PLUGIN_HOST_API_V0: readonly PluginHostMethodSpec[] = [
     panel: false,
     params: eventsSubscribeParams,
     result: eventsSubscribeResult
+  }),
+  // Why not a mutation: plugin-private UI state; progress ticks must not flood the audit log.
+  spec({
+    name: 'statusBar.update',
+    since: '1.1',
+    scope: 'plugin-private',
+    capability: 'statusBar:write',
+    mutation: false,
+    panel: true,
+    params: pluginStatusBarUpdateParamsSchema,
+    result: z.object({ ok: z.literal(true) })
   })
 ]
 

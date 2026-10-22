@@ -16,6 +16,11 @@ import {
   pluginRelativePathSchema
 } from './plugin-manifest-fields'
 import { validatePluginManifestContributions } from './plugin-manifest-contribution-validation'
+import {
+  PLUGIN_STATUS_BAR_ITEM_LIMIT,
+  pluginStatusBarItemContributionSchema,
+  validatePluginStatusBarContributions
+} from './plugin-status-bar'
 
 /**
  * Plugin manifest v1 (`orca-plugin.json` at the plugin root). The
@@ -110,6 +115,10 @@ const pluginManifestV1Object = z.object({
       agents: z
         .array(pluginAgentProfileContributionSchema)
         .max(PLUGIN_AGENT_PROFILE_LIMIT)
+        .default([]),
+      statusBar: z
+        .array(pluginStatusBarItemContributionSchema)
+        .max(PLUGIN_STATUS_BAR_ITEM_LIMIT)
         .default([])
     })
     .strict()
@@ -118,9 +127,10 @@ const pluginManifestV1Object = z.object({
   capabilities: z.array(pluginCapabilitySchema).max(32).default([])
 })
 
-export const pluginManifestSchema = pluginManifestV1Object.superRefine(
-  validatePluginManifestContributions
-)
+export const pluginManifestSchema = pluginManifestV1Object.superRefine((manifest, ctx) => {
+  validatePluginManifestContributions(manifest, ctx)
+  validatePluginStatusBarContributions(manifest, ctx)
+})
 
 export type PluginManifest = z.infer<typeof pluginManifestSchema>
 export type PluginPanelContribution = z.infer<typeof panelContributionSchema>
